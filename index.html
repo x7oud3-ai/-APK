@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مركز التحميل الإحترافي</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #0d1117;
+      color: #c9d1d9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 450px;
+      padding: 24px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: #f0f6fc;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .file-item {
+      background: #21262d;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      border: 1px solid #30363d;
+    }
+
+    .file-info {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .file-name {
+      font-weight: 600;
+      color: #58a6ff;
+      font-size: 0.95rem;
+    }
+
+    .percentage {
+      font-weight: bold;
+      color: #2ea043;
+      font-size: 0.9rem;
+    }
+
+    .progress-bar-bg {
+      background-color: #30363d;
+      border-radius: 8px;
+      height: 10px;
+      width: 100%;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-bar-fill {
+      background: linear-gradient(90deg, #238636, #2ea043);
+      height: 100%;
+      width: 0%;
+      border-radius: 8px;
+      transition: width 0.2s ease;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background-color: #238636;
+      color: white;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .btn:hover {
+      background-color: #2ea043;
+    }
+
+    .btn:disabled {
+      background-color: #30363d;
+      cursor: not-allowed;
+      color: #8b949e;
+    }
+
+    .status-text {
+      font-size: 0.85rem;
+      color: #8b949e;
+      margin-top: 6px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <div class="title">🚀 مركز التحميل</div>
+
+    <div class="file-item">
+      <div class="file-info">
+        <span class="file-name">📱 الحضور.apk</span>
+        <span class="percentage" id="perc1">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="fill1"></div>
+      </div>
+      <div class="status-text" id="status1">في الانتظار...</div>
+    </div>
+
+    <div class="file-item">
+      <div class="file-info">
+        <span class="file-name">💻 تطبيق الحضور للكمبيوتر.html</span>
+        <span class="percentage" id="perc2">0%</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" id="fill2"></div>
+      </div>
+      <div class="status-text" id="status2">في الانتظار...</div>
+    </div>
+
+    <button class="btn" id="startBtn" onclick="startDownload()">بدء التحميل</button>
+  </div>
+
+  <script>
+    // طلب إذن الإشعارات عند تحميل الصفحة
+    if ("Notification" in window) {
+      Notification.requestPermission();
+    }
+
+    function sendNotification(fileName) {
+      if ("Notification" in window && Notification.permission === "granted") {
+        new Notification("تم اكتمال التحميل 🎉", {
+          body: `تم تحميل الملف بنجاح: ${fileName}`,
+          icon: "https://cdn-icons-png.flaticon.com/512/190/190411.png"
+        });
+      }
+    }
+
+    function simulateDownload(fillId, percId, statusId, fileName, url, onComplete) {
+      let progress = 0;
+      const fillEl = document.getElementById(fillId);
+      const percEl = document.getElementById(percId);
+      const statusEl = document.getElementById(statusId);
+
+      statusEl.innerText = "جاري التحميل...";
+
+      const interval = setInterval(() => {
+        // زيادة شريط التحميل بشكل عشوائي يحاكي التحميل الحقيقي
+        progress += Math.floor(Math.random() * 8) + 2;
+
+        if (progress >= 100) {
+          progress = 100;
+          clearInterval(interval);
+          statusEl.innerText = "اكتمل التحميل ✓";
+          statusEl.style.color = "#2ea043";
+          
+          // إرسال الإشعار
+          sendNotification(fileName);
+
+          // تنزيل الملف التلقائي (رابط مباشر للـ GitHub)
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+
+          if (onComplete) onComplete();
+        }
+
+        fillEl.style.width = progress + "%";
+        percEl.innerText = progress + "%";
+      }, 150);
+    }
+
+    function startDownload() {
+      const btn = document.getElementById('startBtn');
+      btn.disabled = true;
+      btn.innerText = "جاري التحميل...";
+
+      // روابط الملفات المباشرة من المستودع الخاص بك على GitHub
+      const url1 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk";
+      const url2 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html";
+
+      // بدء تحميل الملف الأول ثم الملف الثاني
+      simulateDownload("fill1", "perc1", "status1", "التحميل.apk", url1, () => {
+        simulateDownload("fill2", "perc2", "status2", "تطبيق الحضور للكمبيوتر.html", url2, () => {
+          btn.innerText = "تم تنزيل جميع الملفات!";
+        });
+      });
+    }
+  </script>
+</body>
+</html>
+
