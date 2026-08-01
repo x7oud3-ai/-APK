@@ -3,261 +3,292 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>&lt;/&gt; ZIP_ARCHIVE_DOWNLOADER</title>
+  <title>مركز التحميل الإحترافي</title>
   
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 
   <style>
     :root {
-      --bg: #090d16;
-      --panel: #111827;
-      --border: #1f2937;
-      --cyan: #06b6d4;
-      --green: #10b981;
-      --text: #9ca3af;
-      --yellow: #f59e0b;
+      --bg-color: #0d1117;
+      --card-bg: rgba(22, 27, 34, 0.8);
+      --accent: #2f81f7;
+      --accent-hover: #58a6ff;
+      --green: #2ea043;
+      --text-main: #f0f6fc;
+      --text-sub: #8b949e;
+      --border: #30363d;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: monospace, 'Courier New', sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     }
 
     body {
-      background-color: var(--bg);
-      color: #f3f4f6;
+      background-color: var(--bg-color);
+      background-image: radial-gradient(circle at 50% 0%, rgba(47, 129, 247, 0.15), transparent 50%);
+      color: var(--text-main);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 16px;
+      padding: 20px;
     }
 
-    .wrapper {
-      width: 100%;
-      max-width: 480px;
-      background: var(--panel);
+    .card {
+      background: var(--card-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 24px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 440px;
+      padding: 28px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
     }
 
-    .head {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding-bottom: 12px;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 20px;
+    .header {
+      text-align: center;
+      margin-bottom: 24px;
     }
 
-    .head-title {
-      color: var(--cyan);
-      font-weight: bold;
-      font-size: 13px;
-    }
-
-    /* كارت تفاصيل الملف المضغوط */
-    .archive-preview {
-      background: #0b0f19;
-      border: 1px dashed var(--cyan);
-      border-radius: 6px;
-      padding: 16px;
-      margin-bottom: 20px;
-    }
-
-    .archive-title {
-      font-size: 14px;
-      color: var(--yellow);
-      font-weight: bold;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .file-tree {
-      font-size: 11px;
-      color: var(--text);
-      margin-top: 8px;
-      padding-right: 10px;
-      border-right: 2px solid var(--border);
-    }
-
-    .file-tree-item {
-      margin-top: 4px;
-      color: #d1d5db;
-    }
-
-    /* شريط التحميل */
-    .progress-section {
-      margin-top: 15px;
-    }
-
-    .meta {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
+    .header h2 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      color: var(--text-main);
       margin-bottom: 6px;
     }
 
-    .bar-bg {
-      width: 100%;
+    .header p {
+      font-size: 0.85rem;
+      color: var(--text-sub);
+    }
+
+    /* كارت المعاينة للملف المضغوط */
+    .preview-box {
+      background: rgba(13, 17, 23, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+
+    .preview-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .archive-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--accent-hover);
+    }
+
+    .badge {
+      background: rgba(47, 129, 247, 0.15);
+      color: var(--accent-hover);
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .file-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-top: 1px solid var(--border);
+      padding-top: 10px;
+    }
+
+    .file-item {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.82rem;
+      color: var(--text-sub);
+    }
+
+    /* قسم التحميل والعداد */
+    .progress-section {
+      margin-bottom: 20px;
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      margin-bottom: 8px;
+    }
+
+    .status-text {
+      color: var(--text-sub);
+    }
+
+    .percentage {
+      font-weight: 600;
+      color: var(--accent-hover);
+    }
+
+    .progress-bg {
+      background-color: var(--border);
+      border-radius: 20px;
       height: 8px;
-      background: #1f2937;
-      border-radius: 4px;
+      width: 100%;
       overflow: hidden;
     }
 
-    .bar-fill {
-      width: 0%;
+    .progress-fill {
+      background: linear-gradient(90deg, #2f81f7, #58a6ff);
       height: 100%;
-      background: var(--cyan);
-      transition: width 0.1s linear;
+      width: 0%;
+      border-radius: 20px;
+      transition: width 0.15s ease;
     }
 
-    .btn-action {
+    .btn {
       width: 100%;
       padding: 12px;
-      background: transparent;
-      border: 1px solid var(--cyan);
-      color: var(--cyan);
-      font-size: 13px;
-      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      background-color: var(--accent);
+      color: #ffffff;
+      font-weight: 600;
+      font-size: 0.95rem;
       cursor: pointer;
-      border-radius: 4px;
-      transition: 0.2s;
-      margin-top: 16px;
+      transition: all 0.2s ease;
     }
 
-    .btn-action:hover {
-      background: var(--cyan);
-      color: #000;
+    .btn:hover {
+      background-color: var(--accent-hover);
     }
 
-    .btn-action:disabled {
-      border-color: var(--border);
-      color: var(--text);
+    .btn:disabled {
+      background-color: #21262d;
+      color: var(--text-sub);
       cursor: not-allowed;
-      background: transparent;
     }
   </style>
 </head>
 <body>
 
-  <div class="wrapper">
-    <div class="head">
-      <span class="head-title">[ ZIP_BUNDLE_MODULE ]</span>
-      <span style="font-size: 11px; color: var(--text);">TARGET: PKG</span>
+  <div class="card">
+    <div class="header">
+      <h2>تنزيل ملفات التطبيق</h2>
+      <p>تحميل الآرشيف الكامل بصيغة مضغوطة</p>
     </div>
 
-    <div class="archive-preview">
-      <div class="archive-title">
-        <span>PACKAGE: Attendance_Bundle.zip</span>
-        <span style="color: var(--cyan);">[ .ZIP ]</span>
+    <div class="preview-box">
+      <div class="preview-header">
+        <span class="archive-name">Attendance_Bundle.zip</span>
+        <span class="badge">ZIP</span>
       </div>
-      <div style="font-size: 11px; color: var(--text);">CONTENTS_TO_COMPRESS:</div>
-      <div class="file-tree">
-        <div class="file-tree-item">├── الحضور.apk <span style="color: var(--text);">(APK)</span></div>
-        <div class="file-tree-item">└── تطبيق الحضور للكمبيوتر.html <span style="color: var(--text);">(HTML)</span></div>
+      <div class="file-list">
+        <div class="file-item">
+          <span>الذين الحضور.apk</span>
+          <span>تطبيق أندرويد</span>
+        </div>
+        <div class="file-item">
+          <span>تطبيق الحضور للكمبيوتر.html</span>
+          <span>نسخة الويب</span>
+        </div>
       </div>
     </div>
 
     <div class="progress-section">
-      <div class="meta">
-        <span id="stateText">STATUS: WAITING_FOR_ACTION</span>
-        <span id="percText" style="color: var(--green); font-weight: bold;">0%</span>
+      <div class="status-bar">
+        <span class="status-text" id="statusText">جاهز للتحميل</span>
+        <span class="percentage" id="percText">0%</span>
       </div>
-      <div class="bar-bg">
-        <div class="bar-fill" id="barFill"></div>
+      <div class="progress-bg">
+        <div class="progress-fill" id="progressFill"></div>
       </div>
     </div>
 
-    <button class="btn-action" id="startBtn" onclick="processAndZip()">[ DOWNLOAD_AS_ZIP ]</button>
+    <button class="btn" id="startBtn" onclick="downloadZip()">تنزيل الملف المضغوط</button>
   </div>
 
   <script>
-    // طلب صلاحية الإشعارات
+    // طلب إذن الإشعار
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
 
-    function notify(msg) {
+    function sendNotification() {
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("ZIP_PROCESS_COMPLETE", { body: msg });
+        new Notification("تم اكتمال التحميل", {
+          body: "تم تنزيل الحزمة المضغوطة Attendance_Bundle.zip بنجاح."
+        });
       }
     }
 
     async function fetchFile(url) {
       const response = await fetch(url);
-      if (!response.ok) throw new Error("NETWORK_ERROR");
+      if (!response.ok) throw new Error("فشل في جلب البيانات");
       return await response.blob();
     }
 
-    async function processAndZip() {
+    async function downloadZip() {
       const btn = document.getElementById('startBtn');
-      const bar = document.getElementById('barFill');
+      const fill = document.getElementById('progressFill');
       const perc = document.getElementById('percText');
-      const state = document.getElementById('stateText');
+      const status = document.getElementById('statusText');
 
       btn.disabled = true;
-      btn.innerText = "[ FETCHING_FILES... ]";
+      btn.innerText = "جاري تحضير الملفات...";
 
       const zip = new JSZip();
-
       const files = [
         { name: "الحضور.apk", url: "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk" },
         { name: "تطبيق الحضور للكمبيوتر.html", url: "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html" }
       ];
 
       try {
-        // الخطوة 1: جلب الملفات (50% من شريط التقدم)
-        state.innerText = "STATUS: DOWNLOADING_FILES...";
+        status.innerText = "جاري جلب الملفات...";
         
+        // جلب الملفين
         const blob1 = await fetchFile(files[0].url);
-        bar.style.width = "25%";
+        fill.style.width = "25%";
         perc.innerText = "25%";
 
         const blob2 = await fetchFile(files[1].url);
-        bar.style.width = "50%";
+        fill.style.width = "50%";
         perc.innerText = "50%";
 
-        // إضافة الملفات إلى الأرشيف
         zip.file(files[0].name, blob1);
         zip.file(files[1].name, blob2);
 
-        // الخطوة 2: ضغط الملفات مع عداد مئوي للضغط حقيقي (من 50% لـ 100%)
-        state.innerText = "STATUS: COMPRESSING_ZIP...";
-        btn.innerText = "[ COMPRESSING_ARCHIVE... ]";
+        status.innerText = "جاري ضغط الملفات...";
 
-        const zipContent = await zip.generateAsync({ type: "blob" }, function updateCallback(metadata) {
-          const currentPercent = Math.round(50 + (metadata.percent / 2));
-          bar.style.width = currentPercent + "%";
-          perc.innerText = currentPercent + "%";
+        // ضغط الملفات مع عرض النسبة المئوية الحيّة
+        const zipContent = await zip.generateAsync({ type: "blob" }, function update(metadata) {
+          const totalPerc = Math.round(50 + (metadata.percent / 2));
+          fill.style.width = totalPerc + "%";
+          perc.innerText = totalPerc + "%";
         });
 
-        // الخطوة 3: التنزيل التلقائي للملف المضغوط
-        state.innerText = "STATUS: COMPLETE ✓";
-        bar.style.backgroundColor = "var(--green)";
-        
-        const zipName = "Attendance_Bundle.zip";
+        // تنزيل تلقائي للـ Zip
+        status.innerText = "اكتمل التنزيل بنجاح";
+        perc.style.color = "var(--green)";
+        fill.style.background = "var(--green)";
+
         const link = document.createElement('a');
         link.href = URL.createObjectURL(zipContent);
-        link.download = zipName;
+        link.download = "Attendance_Bundle.zip";
         document.body.appendChild(link);
         link.click();
         link.remove();
 
-        notify(`File successfully bundled and downloaded: ${zipName}`);
-        btn.innerText = "[ ARCHIVE_DOWNLOADED ]";
+        sendNotification();
+        btn.innerText = "تم التنزيل";
 
-      } catch (error) {
-        state.innerText = "STATUS: ERROR_FALLBACK";
-        alert("حدث خطأ أثناء تحميل الملفات أو الضغط.");
+      } catch (err) {
+        status.innerText = "حدث خطأ أثناء التنزيل";
         btn.disabled = false;
-        btn.innerText = "[ RETRY ]";
+        btn.innerText = "إعادة المحاولة";
       }
     }
   </script>
