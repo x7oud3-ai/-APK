@@ -3,7 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>&lt;/&gt; SYSTEM_DOWNLOAD_INTERFACE</title>
+  <title>&lt;/&gt; ZIP_ARCHIVE_DOWNLOADER</title>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
   <style>
     :root {
       --bg: #090d16;
@@ -12,6 +15,7 @@
       --cyan: #06b6d4;
       --green: #10b981;
       --text: #9ca3af;
+      --yellow: #f59e0b;
     }
 
     * {
@@ -33,7 +37,7 @@
 
     .wrapper {
       width: 100%;
-      max-width: 500px;
+      max-width: 480px;
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 8px;
@@ -53,38 +57,57 @@
     .head-title {
       color: var(--cyan);
       font-weight: bold;
-      font-size: 14px;
+      font-size: 13px;
     }
 
-    .file-box {
+    /* كارت تفاصيل الملف المضغوط */
+    .archive-preview {
       background: #0b0f19;
-      border: 1px solid var(--border);
-      padding: 14px;
+      border: 1px dashed var(--cyan);
       border-radius: 6px;
-      margin-bottom: 14px;
+      padding: 16px;
+      margin-bottom: 20px;
     }
 
-    .file-meta {
+    .archive-title {
+      font-size: 14px;
+      color: var(--yellow);
+      font-weight: bold;
+      margin-bottom: 10px;
       display: flex;
       justify-content: space-between;
-      font-size: 13px;
-      margin-bottom: 8px;
     }
 
-    .file-name {
-      color: #e5e7eb;
+    .file-tree {
+      font-size: 11px;
+      color: var(--text);
+      margin-top: 8px;
+      padding-right: 10px;
+      border-right: 2px solid var(--border);
     }
 
-    .file-perc {
-      color: var(--green);
-      font-weight: bold;
+    .file-tree-item {
+      margin-top: 4px;
+      color: #d1d5db;
+    }
+
+    /* شريط التحميل */
+    .progress-section {
+      margin-top: 15px;
+    }
+
+    .meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      margin-bottom: 6px;
     }
 
     .bar-bg {
       width: 100%;
-      height: 6px;
+      height: 8px;
       background: #1f2937;
-      border-radius: 3px;
+      border-radius: 4px;
       overflow: hidden;
     }
 
@@ -93,14 +116,6 @@
       height: 100%;
       background: var(--cyan);
       transition: width 0.1s linear;
-    }
-
-    .details {
-      display: flex;
-      justify-content: space-between;
-      font-size: 11px;
-      color: var(--text);
-      margin-top: 6px;
     }
 
     .btn-action {
@@ -114,7 +129,7 @@
       cursor: pointer;
       border-radius: 4px;
       transition: 0.2s;
-      margin-top: 10px;
+      margin-top: 16px;
     }
 
     .btn-action:hover {
@@ -134,145 +149,116 @@
 
   <div class="wrapper">
     <div class="head">
-      <span class="head-title">[ FETCH_REALTIME_STREAM ]</span>
-      <span style="font-size: 11px; color: var(--text);">STATUS: READY</span>
+      <span class="head-title">[ ZIP_BUNDLE_MODULE ]</span>
+      <span style="font-size: 11px; color: var(--text);">TARGET: PKG</span>
     </div>
 
-    <div class="file-box">
-      <div class="file-meta">
-        <span class="file-name">التحميل.apk</span>
-        <span class="file-perc" id="perc1">0%</span>
+    <div class="archive-preview">
+      <div class="archive-title">
+        <span>PACKAGE: Attendance_Bundle.zip</span>
+        <span style="color: var(--cyan);">[ .ZIP ]</span>
+      </div>
+      <div style="font-size: 11px; color: var(--text);">CONTENTS_TO_COMPRESS:</div>
+      <div class="file-tree">
+        <div class="file-tree-item">├── الحضور.apk <span style="color: var(--text);">(APK)</span></div>
+        <div class="file-tree-item">└── تطبيق الحضور للكمبيوتر.html <span style="color: var(--text);">(HTML)</span></div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="meta">
+        <span id="stateText">STATUS: WAITING_FOR_ACTION</span>
+        <span id="percText" style="color: var(--green); font-weight: bold;">0%</span>
       </div>
       <div class="bar-bg">
-        <div class="bar-fill" id="fill1"></div>
-      </div>
-      <div class="details">
-        <span id="bytes1">0 / 0 KB</span>
-        <span id="state1">IDLE</span>
+        <div class="bar-fill" id="barFill"></div>
       </div>
     </div>
 
-    <div class="file-box">
-      <div class="file-meta">
-        <span class="file-name">تطبيق الحضور للكمبيوتر.html</span>
-        <span class="file-perc" id="perc2">0%</span>
-      </div>
-      <div class="bar-bg">
-        <div class="bar-fill" id="fill2"></div>
-      </div>
-      <div class="details">
-        <span id="bytes2">0 / 0 KB</span>
-        <span id="state2">IDLE</span>
-      </div>
-    </div>
-
-    <button class="btn-action" id="startBtn" onclick="startRealDownloads()">[ START_REAL_FETCH ]</button>
+    <button class="btn-action" id="startBtn" onclick="processAndZip()">[ DOWNLOAD_AS_ZIP ]</button>
   </div>
 
   <script>
-    // تفعيل الإشعارات
+    // طلب صلاحية الإشعارات
     if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
 
-    function notifyUser(filename) {
+    function notify(msg) {
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("DOWNLOAD_COMPLETE", {
-          body: `File successfully fetched: ${filename}`
-        });
+        new Notification("ZIP_PROCESS_COMPLETE", { body: msg });
       }
     }
 
-    // دالة التحميل الحقيقي بقراءة الـ Stream
-    async function downloadRealFile(url, filename, fillId, percId, bytesId, stateId) {
-      const fill = document.getElementById(fillId);
-      const perc = document.getElementById(percId);
-      const bytes = document.getElementById(bytesId);
-      const state = document.getElementById(stateId);
+    async function fetchFile(url) {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("NETWORK_ERROR");
+      return await response.blob();
+    }
 
-      state.innerText = "CONNECTING...";
+    async function processAndZip() {
+      const btn = document.getElementById('startBtn');
+      const bar = document.getElementById('barFill');
+      const perc = document.getElementById('percText');
+      const state = document.getElementById('stateText');
+
+      btn.disabled = true;
+      btn.innerText = "[ FETCHING_FILES... ]";
+
+      const zip = new JSZip();
+
+      const files = [
+        { name: "الحضور.apk", url: "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk" },
+        { name: "تطبيق الحضور للكمبيوتر.html", url: "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html" }
+      ];
 
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error("HTTP_ERROR");
-
-        const contentLength = response.headers.get('content-length');
-        const total = contentLength ? parseInt(contentLength, 10) : 0;
-        let loaded = 0;
-
-        const reader = response.body.getReader();
-        const chunks = [];
-
-        state.innerText = "STREAMING...";
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          chunks.push(value);
-          loaded += value.length;
-
-          // حساب العداد الحقيقي بناءً على حجم البيانات المحملة فعلياً
-          if (total > 0) {
-            const percent = Math.round((loaded / total) * 100);
-            fill.style.width = percent + "%";
-            perc.innerText = percent + "%";
-            bytes.innerText = `${(loaded / 1024).toFixed(1)} / ${(total / 1024).toFixed(1)} KB`;
-          } else {
-            // في حال عدم توفر Content-Length من السيرفر
-            fill.style.width = "100%";
-            perc.innerText = "FETCHING...";
-            bytes.innerText = `${(loaded / 1024).toFixed(1)} KB`;
-          }
-        }
-
-        // تحويل البيانات المحملة إلى ملف وتنزيله في الجهاز
-        const blob = new Blob(chunks);
-        const downloadUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = filename;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(downloadUrl);
-
-        state.innerText = "COMPLETE ✓";
-        fill.style.backgroundColor = "var(--green)";
-        notifyUser(filename);
-
-      } catch (err) {
-        // Fallback في حال وجود قيود أمان على الـ CORS من السيرفر
-        state.innerText = "DIRECT_DOWNLOAD";
-        fill.style.width = "100%";
-        perc.innerText = "100%";
+        // الخطوة 1: جلب الملفات (50% من شريط التقدم)
+        state.innerText = "STATUS: DOWNLOADING_FILES...";
         
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = filename;
-        a.target = "_blank";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        notifyUser(filename);
+        const blob1 = await fetchFile(files[0].url);
+        bar.style.width = "25%";
+        perc.innerText = "25%";
+
+        const blob2 = await fetchFile(files[1].url);
+        bar.style.width = "50%";
+        perc.innerText = "50%";
+
+        // إضافة الملفات إلى الأرشيف
+        zip.file(files[0].name, blob1);
+        zip.file(files[1].name, blob2);
+
+        // الخطوة 2: ضغط الملفات مع عداد مئوي للضغط حقيقي (من 50% لـ 100%)
+        state.innerText = "STATUS: COMPRESSING_ZIP...";
+        btn.innerText = "[ COMPRESSING_ARCHIVE... ]";
+
+        const zipContent = await zip.generateAsync({ type: "blob" }, function updateCallback(metadata) {
+          const currentPercent = Math.round(50 + (metadata.percent / 2));
+          bar.style.width = currentPercent + "%";
+          perc.innerText = currentPercent + "%";
+        });
+
+        // الخطوة 3: التنزيل التلقائي للملف المضغوط
+        state.innerText = "STATUS: COMPLETE ✓";
+        bar.style.backgroundColor = "var(--green)";
+        
+        const zipName = "Attendance_Bundle.zip";
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipContent);
+        link.download = zipName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        notify(`File successfully bundled and downloaded: ${zipName}`);
+        btn.innerText = "[ ARCHIVE_DOWNLOADED ]";
+
+      } catch (error) {
+        state.innerText = "STATUS: ERROR_FALLBACK";
+        alert("حدث خطأ أثناء تحميل الملفات أو الضغط.");
+        btn.disabled = false;
+        btn.innerText = "[ RETRY ]";
       }
-    }
-
-    async function startRealDownloads() {
-      const btn = document.getElementById('startBtn');
-      btn.disabled = true;
-      btn.innerText = "[ PROCESSING... ]";
-
-      const file1 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk";
-      const file2 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html";
-
-      // تشغيل التنزيل للملفين في نفس الوقت 
-      await Promise.all([
-        downloadRealFile(file1, "الحضور.apk", "fill1", "perc1", "bytes1", "state1"),
-        downloadRealFile(file2, "تطبيق الحضور للكمبيوتر.html", "fill2", "perc2", "bytes2", "state2")
-      ]);
-
-      btn.innerText = "[ ALL_DOWNLOADS_FINISHED ]";
     }
   </script>
 </body>
