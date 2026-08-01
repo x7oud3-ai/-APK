@@ -3,331 +3,276 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>&lt;/&gt; Dynamic Downloader</title>
+  <title>&lt;/&gt; SYSTEM_DOWNLOAD_INTERFACE</title>
   <style>
     :root {
-      --bg-color: #05050a;
-      --card-bg: #0b0e14;
-      --accent-cyan: #00f0ff;
-      --accent-green: #00ff66;
-      --border-color: #1a2332;
-      --text-muted: #5c6b73;
+      --bg: #090d16;
+      --panel: #111827;
+      --border: #1f2937;
+      --cyan: #06b6d4;
+      --green: #10b981;
+      --text: #9ca3af;
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Fira Code', 'Courier New', monospace, 'Segoe UI';
+      font-family: monospace, 'Courier New', sans-serif;
     }
 
     body {
-      background-color: var(--bg-color);
-      color: #e6edf3;
+      background-color: var(--bg);
+      color: #f3f4f6;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      padding: 20px;
-    }
-
-    .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      width: 100%;
-      max-width: 480px;
-      padding: 28px;
-      box-shadow: 0 0 25px rgba(0, 240, 255, 0.08);
-      position: relative;
-      overflow: hidden;
-    }
-
-    .card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 2px;
-      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
-    }
-
-    .header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 24px;
-      border-bottom: 1px dashed var(--border-color);
-      padding-bottom: 12px;
-    }
-
-    .title {
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--accent-cyan);
-      letter-spacing: 1px;
-    }
-
-    .tag {
-      font-size: 0.75rem;
-      background: rgba(0, 240, 255, 0.1);
-      color: var(--accent-cyan);
-      padding: 2px 8px;
-      border-radius: 4px;
-      border: 1px solid rgba(0, 240, 255, 0.3);
-    }
-
-    .file-container {
-      background: #0f141d;
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
       padding: 16px;
-      margin-bottom: 16px;
-      position: relative;
     }
 
-    .file-header {
+    .wrapper {
+      width: 100%;
+      max-width: 500px;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+
+    .head {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 12px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+    }
+
+    .head-title {
+      color: var(--cyan);
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .file-box {
+      background: #0b0f19;
+      border: 1px solid var(--border);
+      padding: 14px;
+      border-radius: 6px;
+      margin-bottom: 14px;
+    }
+
+    .file-meta {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      margin-bottom: 8px;
     }
 
     .file-name {
-      font-size: 0.88rem;
-      color: #d2a8ff;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      color: #e5e7eb;
     }
 
-    .file-name::before {
-      content: '{;}';
-      color: var(--accent-cyan);
-      font-size: 0.8rem;
-    }
-
-    .percentage {
-      font-size: 0.85rem;
-      color: var(--accent-green);
+    .file-perc {
+      color: var(--green);
       font-weight: bold;
     }
 
-    .progress-bar-bg {
-      background-color: #161b22;
-      border-radius: 4px;
-      height: 8px;
+    .bar-bg {
       width: 100%;
+      height: 6px;
+      background: #1f2937;
+      border-radius: 3px;
       overflow: hidden;
-      border: 1px solid #21262d;
     }
 
-    .progress-bar-fill {
-      background: linear-gradient(90deg, #00f0ff, #00ff66);
-      height: 100%;
+    .bar-fill {
       width: 0%;
-      border-radius: 4px;
-      transition: width 0.15s ease-out;
-      box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+      height: 100%;
+      background: var(--cyan);
+      transition: width 0.1s linear;
     }
 
-    .status-text {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      margin-top: 8px;
+    .details {
       display: flex;
       justify-content: space-between;
+      font-size: 11px;
+      color: var(--text);
+      margin-top: 6px;
     }
 
-    .btn {
+    .btn-action {
       width: 100%;
-      padding: 14px;
-      border: 1px solid var(--accent-cyan);
-      border-radius: 6px;
-      background: rgba(0, 240, 255, 0.05);
-      color: var(--accent-cyan);
-      font-weight: bold;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      margin-top: 10px;
-      letter-spacing: 1px;
-    }
-
-    .btn:hover {
-      background: var(--accent-cyan);
-      color: #000;
-      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-    }
-
-    .btn:disabled {
-      border-color: var(--border-color);
+      padding: 12px;
       background: transparent;
-      color: var(--text-muted);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: 0.2s;
+      margin-top: 10px;
+    }
+
+    .btn-action:hover {
+      background: var(--cyan);
+      color: #000;
+    }
+
+    .btn-action:disabled {
+      border-color: var(--border);
+      color: var(--text);
       cursor: not-allowed;
-      box-shadow: none;
-    }
-
-    .console-log {
-      margin-top: 20px;
-      background: #000;
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 10px;
-      font-size: 0.75rem;
-      color: #8b949e;
-      max-height: 80px;
-      overflow-y: auto;
-    }
-
-    .console-log div::before {
-      content: '$ ';
-      color: var(--accent-cyan);
+      background: transparent;
     }
   </style>
 </head>
 <body>
 
-  <div class="card">
-    <div class="header">
-      <div class="title">&lt;SYS_DOWNLOAD_MODULE/&gt;</div>
-      <div class="tag">v2.0</div>
+  <div class="wrapper">
+    <div class="head">
+      <span class="head-title">[ FETCH_REALTIME_STREAM ]</span>
+      <span style="font-size: 11px; color: var(--text);">STATUS: READY</span>
     </div>
 
-    <div class="file-container">
-      <div class="file-header">
+    <div class="file-box">
+      <div class="file-meta">
         <span class="file-name">التحميل.apk</span>
-        <span class="percentage" id="perc1">0%</span>
+        <span class="file-perc" id="perc1">0%</span>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="fill1"></div>
+      <div class="bar-bg">
+        <div class="bar-fill" id="fill1"></div>
       </div>
-      <div class="status-text">
-        <span id="status1">STATE: IDLE</span>
-        <span id="size1">APK / BINARY</span>
+      <div class="details">
+        <span id="bytes1">0 / 0 KB</span>
+        <span id="state1">IDLE</span>
       </div>
     </div>
 
-    <div class="file-container">
-      <div class="file-header">
+    <div class="file-box">
+      <div class="file-meta">
         <span class="file-name">تطبيق الحضور للكمبيوتر.html</span>
-        <span class="percentage" id="perc2">0%</span>
+        <span class="file-perc" id="perc2">0%</span>
       </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="fill2"></div>
+      <div class="bar-bg">
+        <div class="bar-fill" id="fill2"></div>
       </div>
-      <div class="status-text">
-        <span id="status2">STATE: IDLE</span>
-        <span id="size2">HTML / SOURCE</span>
+      <div class="details">
+        <span id="bytes2">0 / 0 KB</span>
+        <span id="state2">IDLE</span>
       </div>
     </div>
 
-    <button class="btn" id="startBtn" onclick="initiateDownload()">[ RUN_EXECUTE_DOWNLOAD ]</button>
-
-    <div class="console-log" id="console">
-      <div>System initialized. Ready for operations.</div>
-    </div>
+    <button class="btn-action" id="startBtn" onclick="startRealDownloads()">[ START_REAL_FETCH ]</button>
   </div>
 
   <script>
-    if ("Notification" in window) {
+    // تفعيل الإشعارات
+    if ("Notification" in window && Notification.permission !== "granted") {
       Notification.requestPermission();
     }
 
-    function log(msg) {
-      const c = document.getElementById('console');
-      const d = document.createElement('div');
-      d.innerText = msg;
-      c.appendChild(d);
-      c.scrollTop = c.scrollHeight;
-    }
-
-    function triggerFileSave(url, fileName) {
-      fetch(url)
-        .then(response => {
-          if (!response.ok) throw new Error('Network error');
-          return response.blob();
-        })
-        .then(blob => {
-          const link = document.createElement('a');
-          link.href = window.URL.createObjectURL(blob);
-          link.download = fileName;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(link.href);
-          log(`[SUCCESS] File payload delivered: ${fileName}`);
-        })
-        .catch(err => {
-          // Fallback مباشر في حال فشل fetch الأمان
-          const link = document.createElement('a');
-          link.href = url;
-          link.download = fileName;
-          link.target = "_blank";
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          log(`[FALLBACK] Direct link fallback triggered for: ${fileName}`);
-        });
-    }
-
-    function sendNotification(fileName) {
+    function notifyUser(filename) {
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("NOTIFICATION://PROCESS_COMPLETE", {
-          body: `File fully synced and downloaded: ${fileName}`,
+        new Notification("DOWNLOAD_COMPLETE", {
+          body: `File successfully fetched: ${filename}`
         });
       }
     }
 
-    function processTask(fillId, percId, statusId, fileName, url) {
-      return new Promise((resolve) => {
-        let progress = 0;
-        const fillEl = document.getElementById(fillId);
-        const percEl = document.getElementById(percId);
-        const statusEl = document.getElementById(statusId);
+    // دالة التحميل الحقيقي بقراءة الـ Stream
+    async function downloadRealFile(url, filename, fillId, percId, bytesId, stateId) {
+      const fill = document.getElementById(fillId);
+      const perc = document.getElementById(percId);
+      const bytes = document.getElementById(bytesId);
+      const state = document.getElementById(stateId);
 
-        statusEl.innerText = "STATE: DOWNLOADING...";
-        statusEl.style.color = "var(--accent-cyan)";
-        log(`[FETCHING] Initiated fetch for: ${fileName}`);
+      state.innerText = "CONNECTING...";
 
-        const interval = setInterval(() => {
-          progress += Math.floor(Math.random() * 12) + 3;
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("HTTP_ERROR");
 
-          if (progress >= 100) {
-            progress = 100;
-            clearInterval(interval);
-            statusEl.innerText = "STATE: COMPLETE ✓";
-            statusEl.style.color = "var(--accent-green)";
-            
-            triggerFileSave(url, fileName);
-            sendNotification(fileName);
-            resolve();
+        const contentLength = response.headers.get('content-length');
+        const total = contentLength ? parseInt(contentLength, 10) : 0;
+        let loaded = 0;
+
+        const reader = response.body.getReader();
+        const chunks = [];
+
+        state.innerText = "STREAMING...";
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+
+          chunks.push(value);
+          loaded += value.length;
+
+          // حساب العداد الحقيقي بناءً على حجم البيانات المحملة فعلياً
+          if (total > 0) {
+            const percent = Math.round((loaded / total) * 100);
+            fill.style.width = percent + "%";
+            perc.innerText = percent + "%";
+            bytes.innerText = `${(loaded / 1024).toFixed(1)} / ${(total / 1024).toFixed(1)} KB`;
+          } else {
+            // في حال عدم توفر Content-Length من السيرفر
+            fill.style.width = "100%";
+            perc.innerText = "FETCHING...";
+            bytes.innerText = `${(loaded / 1024).toFixed(1)} KB`;
           }
+        }
 
-          fillEl.style.width = progress + "%";
-          percEl.innerText = progress + "%";
-        }, 120);
-      });
+        // تحويل البيانات المحملة إلى ملف وتنزيله في الجهاز
+        const blob = new Blob(chunks);
+        const downloadUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(downloadUrl);
+
+        state.innerText = "COMPLETE ✓";
+        fill.style.backgroundColor = "var(--green)";
+        notifyUser(filename);
+
+      } catch (err) {
+        // Fallback في حال وجود قيود أمان على الـ CORS من السيرفر
+        state.innerText = "DIRECT_DOWNLOAD";
+        fill.style.width = "100%";
+        perc.innerText = "100%";
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.target = "_blank";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        notifyUser(filename);
+      }
     }
 
-    async function initiateDownload() {
+    async function startRealDownloads() {
       const btn = document.getElementById('startBtn');
       btn.disabled = true;
-      btn.innerText = "[ PROCESSING_DOWNLOADS... ]";
+      btn.innerText = "[ PROCESSING... ]";
 
-      // روابط التنزيل المباشرة
-      const file1_url = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk";
-      const file2_url = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html";
+      const file1 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk";
+      const file2 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html";
 
-      // تشغيل التنزيل بالتوازي للملفين لضمان عدم توقف ملف الـ APK
+      // تشغيل التنزيل للملفين في نفس الوقت 
       await Promise.all([
-        processTask("fill1", "perc1", "status1", "الحضور.apk", file1_url),
-        processTask("fill2", "perc2", "status2", "تطبيق الحضور للكمبيوتر.html", file2_url)
+        downloadRealFile(file1, "الحضور.apk", "fill1", "perc1", "bytes1", "state1"),
+        downloadRealFile(file2, "تطبيق الحضور للكمبيوتر.html", "fill2", "perc2", "bytes2", "state2")
       ]);
 
-      btn.innerText = "[ ALL_TASKS_EXECUTED ]";
-      log("[DONE] All queued files successfully processed.");
+      btn.innerText = "[ ALL_DOWNLOADS_FINISHED ]";
     }
   </script>
 </body>
