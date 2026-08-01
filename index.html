@@ -3,18 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مركز التحميل الإحترافي</title>
+  <title>&lt;/&gt; Dynamic Downloader</title>
   <style>
+    :root {
+      --bg-color: #05050a;
+      --card-bg: #0b0e14;
+      --accent-cyan: #00f0ff;
+      --accent-green: #00ff66;
+      --border-color: #1a2332;
+      --text-muted: #5c6b73;
+    }
+
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Fira Code', 'Courier New', monospace, 'Segoe UI';
     }
 
     body {
-      background-color: #0d1117;
-      color: #c9d1d9;
+      background-color: var(--bg-color);
+      color: #e6edf3;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -23,197 +32,303 @@
     }
 
     .card {
-      background: #161b22;
-      border: 1px solid #30363d;
-      border-radius: 16px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
       width: 100%;
-      max-width: 450px;
-      padding: 24px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      max-width: 480px;
+      padding: 28px;
+      box-shadow: 0 0 25px rgba(0, 240, 255, 0.08);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent-cyan), transparent);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      border-bottom: 1px dashed var(--border-color);
+      padding-bottom: 12px;
     }
 
     .title {
-      font-size: 1.4rem;
+      font-size: 1.1rem;
       font-weight: 700;
-      color: #f0f6fc;
-      margin-bottom: 20px;
-      text-align: center;
+      color: var(--accent-cyan);
+      letter-spacing: 1px;
     }
 
-    .file-item {
-      background: #21262d;
-      border-radius: 12px;
+    .tag {
+      font-size: 0.75rem;
+      background: rgba(0, 240, 255, 0.1);
+      color: var(--accent-cyan);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid rgba(0, 240, 255, 0.3);
+    }
+
+    .file-container {
+      background: #0f141d;
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
       padding: 16px;
       margin-bottom: 16px;
-      border: 1px solid #30363d;
-    }
-
-    .file-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-
-    .file-name {
-      font-weight: 600;
-      color: #58a6ff;
-      font-size: 0.95rem;
-    }
-
-    .percentage {
-      font-weight: bold;
-      color: #2ea043;
-      font-size: 0.9rem;
-    }
-
-    .progress-bar-bg {
-      background-color: #30363d;
-      border-radius: 8px;
-      height: 10px;
-      width: 100%;
-      overflow: hidden;
       position: relative;
     }
 
+    .file-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .file-name {
+      font-size: 0.88rem;
+      color: #d2a8ff;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .file-name::before {
+      content: '{;}';
+      color: var(--accent-cyan);
+      font-size: 0.8rem;
+    }
+
+    .percentage {
+      font-size: 0.85rem;
+      color: var(--accent-green);
+      font-weight: bold;
+    }
+
+    .progress-bar-bg {
+      background-color: #161b22;
+      border-radius: 4px;
+      height: 8px;
+      width: 100%;
+      overflow: hidden;
+      border: 1px solid #21262d;
+    }
+
     .progress-bar-fill {
-      background: linear-gradient(90deg, #238636, #2ea043);
+      background: linear-gradient(90deg, #00f0ff, #00ff66);
       height: 100%;
       width: 0%;
-      border-radius: 8px;
-      transition: width 0.2s ease;
+      border-radius: 4px;
+      transition: width 0.15s ease-out;
+      box-shadow: 0 0 10px rgba(0, 255, 102, 0.4);
+    }
+
+    .status-text {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
     }
 
     .btn {
       width: 100%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background-color: #238636;
-      color: white;
+      padding: 14px;
+      border: 1px solid var(--accent-cyan);
+      border-radius: 6px;
+      background: rgba(0, 240, 255, 0.05);
+      color: var(--accent-cyan);
       font-weight: bold;
-      font-size: 1rem;
+      font-size: 0.95rem;
       cursor: pointer;
-      transition: background 0.3s ease;
+      transition: all 0.3s ease;
       margin-top: 10px;
+      letter-spacing: 1px;
     }
 
     .btn:hover {
-      background-color: #2ea043;
+      background: var(--accent-cyan);
+      color: #000;
+      box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
     }
 
     .btn:disabled {
-      background-color: #30363d;
+      border-color: var(--border-color);
+      background: transparent;
+      color: var(--text-muted);
       cursor: not-allowed;
-      color: #8b949e;
+      box-shadow: none;
     }
 
-    .status-text {
-      font-size: 0.85rem;
+    .console-log {
+      margin-top: 20px;
+      background: #000;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 0.75rem;
       color: #8b949e;
-      margin-top: 6px;
+      max-height: 80px;
+      overflow-y: auto;
+    }
+
+    .console-log div::before {
+      content: '$ ';
+      color: var(--accent-cyan);
     }
   </style>
 </head>
 <body>
 
   <div class="card">
-    <div class="title">🚀 مركز التحميل</div>
+    <div class="header">
+      <div class="title">&lt;SYS_DOWNLOAD_MODULE/&gt;</div>
+      <div class="tag">v2.0</div>
+    </div>
 
-    <div class="file-item">
-      <div class="file-info">
-        <span class="file-name">📱 الحضور.apk</span>
+    <div class="file-container">
+      <div class="file-header">
+        <span class="file-name">التحميل.apk</span>
         <span class="percentage" id="perc1">0%</span>
       </div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="fill1"></div>
       </div>
-      <div class="status-text" id="status1">في الانتظار...</div>
+      <div class="status-text">
+        <span id="status1">STATE: IDLE</span>
+        <span id="size1">APK / BINARY</span>
+      </div>
     </div>
 
-    <div class="file-item">
-      <div class="file-info">
-        <span class="file-name">💻 تطبيق الحضور للكمبيوتر.html</span>
+    <div class="file-container">
+      <div class="file-header">
+        <span class="file-name">تطبيق الحضور للكمبيوتر.html</span>
         <span class="percentage" id="perc2">0%</span>
       </div>
       <div class="progress-bar-bg">
         <div class="progress-bar-fill" id="fill2"></div>
       </div>
-      <div class="status-text" id="status2">في الانتظار...</div>
+      <div class="status-text">
+        <span id="status2">STATE: IDLE</span>
+        <span id="size2">HTML / SOURCE</span>
+      </div>
     </div>
 
-    <button class="btn" id="startBtn" onclick="startDownload()">بدء التحميل</button>
+    <button class="btn" id="startBtn" onclick="initiateDownload()">[ RUN_EXECUTE_DOWNLOAD ]</button>
+
+    <div class="console-log" id="console">
+      <div>System initialized. Ready for operations.</div>
+    </div>
   </div>
 
   <script>
-    // طلب إذن الإشعارات عند تحميل الصفحة
     if ("Notification" in window) {
       Notification.requestPermission();
     }
 
+    function log(msg) {
+      const c = document.getElementById('console');
+      const d = document.createElement('div');
+      d.innerText = msg;
+      c.appendChild(d);
+      c.scrollTop = c.scrollHeight;
+    }
+
+    function triggerFileSave(url, fileName) {
+      fetch(url)
+        .then(response => {
+          if (!response.ok) throw new Error('Network error');
+          return response.blob();
+        })
+        .then(blob => {
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+          log(`[SUCCESS] File payload delivered: ${fileName}`);
+        })
+        .catch(err => {
+          // Fallback مباشر في حال فشل fetch الأمان
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = fileName;
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          log(`[FALLBACK] Direct link fallback triggered for: ${fileName}`);
+        });
+    }
+
     function sendNotification(fileName) {
       if ("Notification" in window && Notification.permission === "granted") {
-        new Notification("تم اكتمال التحميل 🎉", {
-          body: `تم تحميل الملف بنجاح: ${fileName}`,
-          icon: "https://cdn-icons-png.flaticon.com/512/190/190411.png"
+        new Notification("NOTIFICATION://PROCESS_COMPLETE", {
+          body: `File fully synced and downloaded: ${fileName}`,
         });
       }
     }
 
-    function simulateDownload(fillId, percId, statusId, fileName, url, onComplete) {
-      let progress = 0;
-      const fillEl = document.getElementById(fillId);
-      const percEl = document.getElementById(percId);
-      const statusEl = document.getElementById(statusId);
+    function processTask(fillId, percId, statusId, fileName, url) {
+      return new Promise((resolve) => {
+        let progress = 0;
+        const fillEl = document.getElementById(fillId);
+        const percEl = document.getElementById(percId);
+        const statusEl = document.getElementById(statusId);
 
-      statusEl.innerText = "جاري التحميل...";
+        statusEl.innerText = "STATE: DOWNLOADING...";
+        statusEl.style.color = "var(--accent-cyan)";
+        log(`[FETCHING] Initiated fetch for: ${fileName}`);
 
-      const interval = setInterval(() => {
-        // زيادة شريط التحميل بشكل عشوائي يحاكي التحميل الحقيقي
-        progress += Math.floor(Math.random() * 8) + 2;
+        const interval = setInterval(() => {
+          progress += Math.floor(Math.random() * 12) + 3;
 
-        if (progress >= 100) {
-          progress = 100;
-          clearInterval(interval);
-          statusEl.innerText = "اكتمل التحميل ✓";
-          statusEl.style.color = "#2ea043";
-          
-          // إرسال الإشعار
-          sendNotification(fileName);
+          if (progress >= 100) {
+            progress = 100;
+            clearInterval(interval);
+            statusEl.innerText = "STATE: COMPLETE ✓";
+            statusEl.style.color = "var(--accent-green)";
+            
+            triggerFileSave(url, fileName);
+            sendNotification(fileName);
+            resolve();
+          }
 
-          // تنزيل الملف التلقائي (رابط مباشر للـ GitHub)
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = fileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-
-          if (onComplete) onComplete();
-        }
-
-        fillEl.style.width = progress + "%";
-        percEl.innerText = progress + "%";
-      }, 150);
+          fillEl.style.width = progress + "%";
+          percEl.innerText = progress + "%";
+        }, 120);
+      });
     }
 
-    function startDownload() {
+    async function initiateDownload() {
       const btn = document.getElementById('startBtn');
       btn.disabled = true;
-      btn.innerText = "جاري التحميل...";
+      btn.innerText = "[ PROCESSING_DOWNLOADS... ]";
 
-      // روابط الملفات المباشرة من المستودع الخاص بك على GitHub
-      const url1 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk";
-      const url2 = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html";
+      // روابط التنزيل المباشرة
+      const file1_url = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/الحضور.apk";
+      const file2_url = "https://raw.githubusercontent.com/x7oud3-ai/-APK/main/تطبيق%20الحضور%20للكمبيوتر.html";
 
-      // بدء تحميل الملف الأول ثم الملف الثاني
-      simulateDownload("fill1", "perc1", "status1", "التحميل.apk", url1, () => {
-        simulateDownload("fill2", "perc2", "status2", "تطبيق الحضور للكمبيوتر.html", url2, () => {
-          btn.innerText = "تم تنزيل جميع الملفات!";
-        });
-      });
+      // تشغيل التنزيل بالتوازي للملفين لضمان عدم توقف ملف الـ APK
+      await Promise.all([
+        processTask("fill1", "perc1", "status1", "الحضور.apk", file1_url),
+        processTask("fill2", "perc2", "status2", "تطبيق الحضور للكمبيوتر.html", file2_url)
+      ]);
+
+      btn.innerText = "[ ALL_TASKS_EXECUTED ]";
+      log("[DONE] All queued files successfully processed.");
     }
   </script>
 </body>
 </html>
-
