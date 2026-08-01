@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>نظام حضور الطلاب</title>
+<style>
+body{font-family:Arial,sans-serif;background:#f4f4f4;padding:20px;margin:0}
+header{display:flex;justify-content:space-between;align-items:center;background:#ffffff;padding:10px 20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);position:sticky;top:0;z-index:1000}
+#leftStats,#centerTitleClock,#rightNav{display:flex;flex-direction:column;align-items:center}
+#leftStats{flex:1;text-align:left}
+#centerTitleClock{flex:1;align-items:center}
+#rightNav{flex:1;align-items:flex-end}
+#rightNav button{margin-left:5px;padding:10px 15px;border:none;border-radius:6px;background:#0a79df;color:white;cursor:pointer;margin-bottom:5px}
+h1{font-size:24px;margin:0;color:#0a79df;text-align:center}
+#clock{font-size:16px;color:#333;margin-top:5px}
+#stats{font-size:16px;color:#333;border-top:2px solid #0a79df;border-bottom:2px solid #0a79df;padding:5px;margin-top:5px}
+section{display:none;background:white;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1);margin-bottom:20px}
+section.active{display:block}
+input,select,button{display:block;width:95%;margin:10px 0;padding:10px;border-radius:6px;border:1px solid #ccc}
+table{width:100%;border-collapse:collapse;margin-top:10px}
+th,td{border:1px solid #ddd;padding:8px;text-align:center}
+.qrCell{width:140px;}
+video{width:100%;border-radius:6px;margin-top:10px;}
+.deleteBtn{background:#e74c3c;color:white;border:none;padding:5px 10px;border-radius:5px;cursor:pointer}
+</style>
+</head>
+<body>
+
+<header>
+<div id="leftStats">
+<div id="stats">الطلاب الحاضرون: 0 | الطلاب الغائبون: 0</div>
+</div>
+<div id="centerTitleClock">
+<h1>نظام حضور الطلاب</h1>
+<div id="clock"></div>
+</div>
+<div id="rightNav">
+<button onclick="showSection('students')">تسجيل الطلاب</button>
+<button onclick="showSection('attendance')">الغياب</button>
+<button onclick="showSection('daily')">كشف الغياب اليومي</button>
+<button onclick="showSection('weekly')">كشف الغياب الأسبوعي</button>
+<button onclick="showSection('payments')">كشف الفلوس</button>
+<button onclick="showSection('unpaid')">الطلاب المتأخرين في الدفع</button>
+</div>
+</header>
+
+<section id="students" class="active">
+<h2>تسجيل الطلاب</h2>
+<input id="stuName" placeholder="اسم الطالب">
+<input id="stuGrade" placeholder="الصف">
+<input id="stuPhone" placeholder="رقم هاتف الطالب">
+<input id="stuParent" placeholder="رقم ولى الأمر">
+<button onclick="addStudent()">أضف طالب</button>
+<table id="studentsTable">
+<thead><tr><th>الكود</th><th>QR Code</th><th>الاسم</th><th>الصف</th><th>هاتف الطالب</th><th>هاتف ولى الأمر</th><th>حذف</th></tr></thead>
+<tbody></tbody>
+</table>
+</section>
+
+<section id="attendance">
+<h2>تسجيل الغياب والحضور</h2>
+<input id="attName" placeholder="ادخل اسم الطالب للحضور">
+<button onclick="markAttendanceByName()">سجل الحضور بالاسم</button>
+<input id="attCode" placeholder="ادخل كود الطالب للحضور">
+<button onclick="markAttendanceByCode()">سجل الحضور بالكود</button>
+<table id="attendanceTable">
+<thead><tr><th>التاريخ</th><th>الكود</th><th>الاسم</th><th>الحالة</th></tr></thead>
+<tbody></tbody>
+</table>
+</section>
+
+<section id="daily">
+<h2>كشف الغياب اليومي</h2>
+<button onclick="showDailyAbsentees()">عرض الطلاب الغائبين اليوم</button>
+<table id="dailyTable">
+<thead><tr><th>الكود</th><th>الاسم</th><th>الحالة اليوم</th></tr></thead>
+<tbody></tbody>
+</table>
+</section>
+
+<section id="weekly">
+<h2>كشف الغياب الأسبوعي</h2>
+<button onclick="showWeeklyAbsentees()">عرض الطلاب الغائبين خلال الأسبوع</button>
+<table id="weeklyTable">
+<thead><tr><th>الكود</th><th>الاسم</th><th>الحالة هذا الأسبوع</th></tr></thead>
+<tbody></tbody>
+</table>
+</section>
+
+<section id="payments">
+<h2>كشف الفلوس الشهري</h2>
+<select id="payStudent"></select>
+<input id="payAmount" type="number" placeholder="المبلغ (جنيه)">
+<select id="payMonth">
+<option value="1">يناير</option>
+<option value="2">فبراير</option>
+<option value="3">مارس</option>
+<option value="4">أبريل</option>
+<option value="5">مايو</option>
+<option value="6">يونيو</option>
+<option value="7">يوليو</option>
+<option value="8">أغسطس</option>
+<option value="9">سبتمبر</option>
+<option value="10">أكتوبر</option>
+<option value="11">نوفمبر</option>
+<option value="12">ديسمبر</option>
+</select>
+<button onclick="addPayment()">أضف دفعة</button>
+<table id="paymentsTable">
+<thead><tr><th>الكود</th><th>الاسم</th><th>المبلغ</th><th>الشهر</th><th>التاريخ</th></tr></thead>
+<tbody></tbody>
+</table>
+</section>
+
+<section id="unpaid">
+<h2>الطلاب المتأخرين في دفع الدرس</h2>
+<button onclick="showUnpaidStudents()">عرض الطلاب المتأخرين</button>
+<table id="unpaidTable">
+<thead><tr><th>الكود</th><th>الاسم</th><th>المبلغ المدفوع</th></tr></thead>
+<tbody></tbody>
+</table>
+</section>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+let students = JSON.parse(localStorage.getItem('students') || '[]');
+let attendance = JSON.parse(localStorage.getItem('attendance') || '[]');
+let payments = JSON.parse(localStorage.getItem('payments') || '[]');
+let nextCode = students.length ? Math.max(...students.map(s => s.code)) + 1 : 1;
+
+function showSection(sectionId){
+  document.querySelectorAll('section').forEach(sec => sec.classList.remove('active'));
+  document.getElementById(sectionId).classList.add('active');
+}
+
+function addStudent(){
+  const name = document.getElementById('stuName').value.trim();
+  const grade = document.getElementById('stuGrade').value.trim();
+  const phone = document.getElementById('stuPhone').value.trim();
+  const parent = document.getElementById('stuParent').value.trim();
+  if(!name || !grade){ alert('الرجاء إدخال الاسم والصف'); return; }
+  const student = { code: nextCode++, name, grade, phone, parent };
+  students.push(student);
+  localStorage.setItem('students', JSON.stringify(students));
+  renderStudentsTable();
+  document.getElementById('stuName').value='';
+  document.getElementById('stuGrade').value='';
+  document.getElementById('stuPhone').value='';
+  document.getElementById('stuParent').value='';
+  populatePayStudent();
+}
+
+function renderStudentsTable(){
+  const tbody = document.querySelector('#studentsTable tbody');
+  tbody.innerHTML = '';
+  students.forEach(s => {
+    const tr = document.createElement('tr');
+    const qrCell = document.createElement('td');
+    qrCell.classList.add('qrCell');
+    tr.innerHTML = `<td>${s.code}</td><td></td><td>${s.name}</td><td>${s.grade}</td><td>${s.phone}</td><td>${s.parent}</td><td><button class='deleteBtn' onclick='deleteStudent(${s.code})'>حذف</button></td>`;
+    tr.replaceChild(qrCell, tr.children[1]);
+    tbody.appendChild(tr);
+    new QRCode(qrCell, {text: s.code.toString(), width: 80, height: 80});
+  });
+}
+
+function deleteStudent(code){
+  students = students.filter(s => s.code !== code);
+  localStorage.setItem('students', JSON.stringify(students));
+  renderStudentsTable();
+  populatePayStudent();
+}
+
+function populatePayStudent(){
+  const sel = document.getElementById('payStudent');
+  sel.innerHTML = '';
+  students.forEach(s => { const opt = document.createElement('option'); opt.value = s.code; opt.textContent = s.name; sel.appendChild(opt); });
+}
+
+function markAttendanceByName(){
+  const name = document.getElementById('attName').value.trim();
+  const student = students.find(s => s.name === name);
+  if(!student){ alert('الطالب غير موجود'); return; }
+  recordAttendance(student);
+  document.getElementById('attName').value='';
+}
+
+function markAttendanceByCode(){
+  const code = parseInt(document.getElementById('attCode').value);
+  const student = students.find(s => s.code === code);
+  if(!student){ alert('الطالب غير موجود'); return; }
+  recordAttendance(student);
+  document.getElementById('attCode').value='';
+}
+
+function recordAttendance(student){
+  const today = new Date().toLocaleDateString();
+  const existing = attendance.find(a => a.code === student.code && a.date === today);
+  if(existing){ alert('تم تسجيل الحضور مسبقاً لهذا الطالب اليوم'); return; }
+  attendance.push({ code: student.code, name: student.name, date: today, status: 'حاضر' });
+  localStorage.setItem('attendance', JSON.stringify(attendance));
+  renderAttendanceTable();
+}
+
+function renderAttendanceTable(){
+  const tbody = document.querySelector('#attendanceTable tbody');
+  tbody.innerHTML='';
+  attendance.forEach(a => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${a.date}</td><td>${a.code}</td><td>${a.name}</td><td>${a.status}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showDailyAbsentees(){
+  const today = new Date().toLocaleDateString();
+  const tbody = document.querySelector('#dailyTable tbody');
+  tbody.innerHTML='';
+  students.forEach(s => {
+    const att = attendance.find(a => a.code === s.code && a.date === today);
+    const status = att ? att.status : 'غائب';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.code}</td><td>${s.name}</td><td>${status}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showWeeklyAbsentees(){
+  const today = new Date();
+  const weekAgo = new Date();
+  weekAgo.setDate(today.getDate() - 7);
+  const tbody = document.querySelector('#weeklyTable tbody');
+  tbody.innerHTML='';
+  students.forEach(s => {
+    let presentDays = attendance.filter(a => a.code===s.code && new Date(a.date) >= weekAgo).length;
+    const status = presentDays > 0 ? 'حاضر جزئي' : 'غائب';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${s.code}</td><td>${s.name}</td><td>${status}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function addPayment(){
+  const code = parseInt(document.getElementById('payStudent').value);
+  const amount = parseFloat(document.getElementById('payAmount').value);
+  const month = parseInt(document.getElementById('payMonth').value);
+  if(isNaN(amount) || amount <= 0){ alert('الرجاء إدخال مبلغ صالح'); return; }
+  const student = students.find(s => s.code === code);
+  if(!student){ alert('الطالب غير موجود'); return; }
+  const date = new Date().toLocaleDateString();
+  payments.push({ code: student.code, name: student.name, amount, month, date });
+  localStorage.setItem('payments', JSON.stringify(payments));
+  renderPaymentsTable();
+  document.getElementById('payAmount').value='';
+}
+
+function renderPaymentsTable(){
+  const tbody = document.querySelector('#paymentsTable tbody');
+  tbody.innerHTML='';
+  payments.forEach(p => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${p.code}</td><td>${p.name}</td><td>${p.amount}</td><td>${p.month}</td><td>${p.date}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function showUnpaidStudents(){
+  const tbody = document.querySelector('#unpaidTable tbody');
+  tbody.innerHTML='';
+  students.forEach(s => {
+    const totalPaid = payments.filter(p => p.code === s.code).reduce((sum,p)=>sum+p.amount,0);
+    if(totalPaid <= 0){
+      const tr = document.createElement('tr');
+      tr.innerHTML = `<td>${s.code}</td><td>${s.name}</td><td>${totalPaid}</td>`;
+      tbody.appendChild(tr);
+    }
+  });
+}
+
+function updateClock(){
+  const now = new Date();
+  document.getElementById('clock').textContent = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+renderStudentsTable();
+populatePayStudent();
+renderAttendanceTable();
+renderPaymentsTable();
+</script>
+
+</body>
+</html>
